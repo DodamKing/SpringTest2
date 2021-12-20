@@ -8,11 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.spring.springInterceptor.db.service.UserService;
 import com.spring.springInterceptor.db.vo.UserVO;
+import com.spring.springInterceptor.db.vo.ValidatorVO;
 
 @Controller
 @RequestMapping("/user")
@@ -78,7 +81,9 @@ public class UserController {
 		String pwd = userService.getUserVO(vo.getIdx()).getPwd();
 		
 		if (!bCryptPasswordEncoder.matches(vo.getPwd(), pwd)) {
-			return "redirect:/msg/userPwdCheckFalse?idx=" + vo.getIdx();
+			String msgFlag = "userPwdCheckFalse?idx=" + vo.getIdx();
+			/* return "redirect:/msg/userPwdCheckFalse?idx=" + vo.getIdx(); */ 
+			return "redirect:/msg/" + msgFlag; 
 			/* return "redirect:/user/userPwdCheck?idx=" + vo.getIdx(); */
 		}
 		
@@ -90,7 +95,7 @@ public class UserController {
 	  public String userUpdatePost(UserVO vo) { 
 	  	vo.setPwd(bCryptPasswordEncoder.encode(vo.getPwd()));
   		userService.setUserUpdate(vo); 
-  		return"redirect:/msg/userUpdateSuccess"; 
+  		return"redirect:/msg/userUpdateSuccess?idx=" + vo.getIdx(); 
 	  }
 	 
 	
@@ -100,4 +105,34 @@ public class UserController {
 		model.addAttribute("vos", vos);
 		return "db/user/userList";
 	}
+	
+	@RequestMapping("/validatorForm")
+	public String validatorFormGet() {
+		return "db/user/validatorForm";
+	}
+	
+	@RequestMapping(value="/validatorForm", method = RequestMethod.POST)
+	public String validatorFormPost(Model model, @Validated ValidatorVO vo, BindingResult bindingResult) {
+		String msg = "";
+		if (bindingResult.hasFieldErrors("mid")) {
+			msg = bindingResult.getFieldError("mid").getDefaultMessage();
+			System.out.println(msg);
+			return "redirect:/msg/validatorMidFalse";
+		}
+		
+		else if (bindingResult.hasFieldErrors("pwd")) {
+			msg = bindingResult.getFieldError("pwd").getDefaultMessage();
+			System.out.println(msg);
+			return "redirect:/msg/validatorPwdFalse";
+		}
+		
+		else if (bindingResult.hasFieldErrors("age")) {
+			msg = bindingResult.getFieldError("age").getDefaultMessage();
+			System.out.println(msg);
+			return "redirect:/msg/validatorAgeFalse";
+		}
+		
+		model.addAttribute("vo", vo);
+		return "db/user/validatorFormOk";
+	} 
 }

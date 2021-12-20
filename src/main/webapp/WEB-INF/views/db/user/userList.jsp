@@ -19,6 +19,7 @@
 			</div>
 		</div>
 		<div class="text-right">
+			<a href="${ctp }/user/validatorForm" class="btn btn-warning m-3">데이터검증</a>
 			<a href="${ctp }/user/userInput" class="btn btn-warning m-3">등록</a>
 		</div>
 		<table class="table text-center">

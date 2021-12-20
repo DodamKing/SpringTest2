@@ -1,5 +1,8 @@
 package com.spring.springInterceptor.db.controller;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,7 +19,7 @@ public class MessageController {
 
 		else if (msgFlag.equals("userUpdateSuccess")) {
 			model.addAttribute("msg", "수정 되었습니다.");
-			model.addAttribute("url", "user/userList");
+			model.addAttribute("url", "user/userUpdate?idx=" + idx);
 		}
 
 		else if (msgFlag.equals("userDeleteSuccess")) {
@@ -25,10 +28,23 @@ public class MessageController {
 		}
 		
 		else if (msgFlag.equals("userPwdCheckFalse")) {
-			int idx_ = Integer.parseInt(idx);
 			model.addAttribute("msg", "비밀번호가 틀립니다.");
-			model.addAttribute("url", "user/userPwdCheck?idx=" + idx_); 
-			/* model.addAttribute("url", "user/userList"); */
+			model.addAttribute("url", "user/userPwdCheck?idx=" + idx); 
+		}
+		
+		else if (msgFlag.equals("validatorMidFalse")) {
+			model.addAttribute("msg", "아이디는 4 ~ 20 여야 합니다.");
+			model.addAttribute("url", "user/validatorForm"); 
+		}
+		
+		else if (msgFlag.equals("validatorPwdFalse")) {
+			model.addAttribute("msg", "비밀번호는 4 ~ 20 여야 합니다.");
+			model.addAttribute("url", "user/validatorForm"); 
+		}
+		
+		else if (msgFlag.equals("validatorAgeFalse")) {
+			model.addAttribute("msg", "20세 이상만 가능합니다.");
+			model.addAttribute("url", "user/validatorForm"); 
 		}
 		
 		
