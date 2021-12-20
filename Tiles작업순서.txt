@@ -1,0 +1,132 @@
+(1) Tiles 라이브러리 삽입(pom.xml) : 5개(기본) + 1개(에러발생시)
+    <!-- tiles-jsp -->
+    <dependency>
+      <groupId>org.apache.tiles</groupId>
+      <artifactId>tiles-jsp</artifactId>
+      <version>3.0.8</version>
+    </dependency>
+    <!-- tiles-servlet -->
+    <dependency>
+      <groupId>org.apache.tiles</groupId>
+      <artifactId>tiles-servlet</artifactId>
+      <version>3.0.8</version>
+    </dependency>
+    <!-- tiles-core -->
+    <dependency>
+      <groupId>org.apache.tiles</groupId>
+      <artifactId>tiles-core</artifactId>
+      <version>3.0.8</version>
+    </dependency>
+    <!-- tiles-api -->
+    <dependency>
+      <groupId>org.apache.tiles</groupId>
+      <artifactId>tiles-api</artifactId>
+      <version>3.0.8</version>
+    </dependency>
+    <!-- tiles-template -->
+    <dependency>
+      <groupId>org.apache.tiles</groupId>
+      <artifactId>tiles-template</artifactId>
+      <version>3.0.8</version>
+    </dependency>
+
+<!-- 에러 발생시 추가 주입한다 -->   
+<!-- https://mvnrepository.com/artifact/commons-beanutils/commons-beanutils -->
+<dependency>
+    <groupId>commons-beanutils</groupId>
+    <artifactId>commons-beanutils</artifactId>
+    <version>1.9.4</version>
+</dependency>
+
+(2) Layout 설계
+  : tiles를 적용시킬 view와 적용하지 않을 view를 설계한다.
+  : 폴더생성 : layout
+  : 파일설계
+    - tiles를 적용시킬 기본 레이아웃파일 제작 : baseLayout.jsp
+    - jsp파일 상당에 태그라이브러리를 올려준다.
+      <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
+
+<body>
+<tiles:insertAtrribute name="header"/>
+<tiles:insertAtrribute name="nav"/>
+<div style="height:500px" class="container">
+	<tiles:insertAtrribute name="content"/>
+</div>
+<tiles:insertAtrribute name="footer"/>
+</body>
+
+  - tiles를 적용시키지 않을 레이아웃파일 제작 : loginLayout.jsp
+<div class="container">
+	<tiles:insertAttribute name="content"/>
+</div>
+</body>
+
+(3) 필요한 view파일들을 미리 만들어 둔다.
+  - tiles가 적용되지 않는 위치(폴더)? member폴더
+  - 앞의 폴더를 제외한 다른폴더는 tiles를 적용시킨다.
+  - 기본 jsp파일 제작 : header.jsp / footer.jsp / nav.jsp
+
+(4) tiles설정하기(servlet-context.xml)
+  <!-- tiles 환경설정하기 -->
+  <beans:bean id="tilesViewResolver" class="org.springframework.web.servlet.view.tiles3.TilesViewResolver">
+    <beans:property name="viewClass" value="org.springframework.web.servlet.view.tiles3.TilesView"/>
+    <beans:property name="order" value="1"/>
+  </beans:bean>
+  <beans:bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles3.TilesConfigurer">
+    <beans:property name="definitions">
+      <beans:list>
+        <beans:value>/WEB-INF/spring/appServlet/tiles-def.xml</beans:value>
+      </beans:list>
+    </beans:property>
+  </beans:bean>
+
+(5) tiles 설정파일 작성(tiles-def.xml)
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tiles-definitions PUBLIC
+  "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN"
+  "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+
+<tiles-definitions>
+
+  <!-- tiles(레이아웃)를 적용하지 않는 화면 설계셋팅(loginLayout.jsp) -->
+  <definition name="layoutNo" template="/WEB-INF/views/layout/loginLayout.jsp"/>
+  <definition name="member/*" extends="layoutNo">
+    <put-attribute name="content" value="/WEB-INF/views/member/{1}.jsp"/>
+  </definition>
+
+  <!-- tiles(레이아웃)를 적용하는 화면 설계셋팅(baseLayout.jsp) -->
+  <definition name="layoutYes" template="/WEB-INF/views/layout/baseLayout.jsp">
+    <put-attribute name="header" value="/WEB-INF/views/layout/header.jsp"/>
+    <put-attribute name="nav" value="/WEB-INF/views/layout/nav.jsp"/>
+    <put-attribute name="footer" value="/WEB-INF/views/layout/footer.jsp"/>
+  </definition>
+  <definition name="*/*" extends="layoutYes">
+    <put-attribute name="content" value="/WEB-INF/views/{1}/{2}.jsp"/>
+  </definition>
+  <definition name="*/*/*" extends="layoutYes">
+    <put-attribute name="content" value="/WEB-INF/views/{1}/{2}/{3}.jsp"/>
+  </definition>
+
+</tiles-definitions>
+
+(6) 나머지 View파일들을 제작한다.
+
+
+(7) 컨트롤러에 등록시켜준다.
+
+
+=============================
+한글 처리 : web.xml 에서 필터 처리한다.
+  <!-- 한글처리(필터적용) -->
+  <filter>
+    <filter-name>encoding</filter-name>
+    <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+    <init-param>
+      <param-name>encoding</param-name>
+      <param-value>UTF-8</param-value>
+    </init-param>
+  </filter>
+  <filter-mapping>
+    <filter-name>encoding</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
